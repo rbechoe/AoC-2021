@@ -15,7 +15,7 @@ public class template : MonoBehaviour
         Stopwatch st = new Stopwatch();
         st.Start();
 
-        FileStream fs = new FileStream(Application.dataPath + "/scripts/teninput.txt", FileMode.Open);
+        FileStream fs = new FileStream(Application.dataPath + "/inputs/xx.txt", FileMode.Open);
         string content = "";
         using (StreamReader read = new StreamReader(fs, true))
         {
