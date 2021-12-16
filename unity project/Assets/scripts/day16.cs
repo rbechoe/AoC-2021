@@ -59,143 +59,11 @@ public class day16 : MonoBehaviour
             // is a literal value
             if (hexaValue.Substring(3, 3) == "100") // -- WORKS CORRECT
             {
-                char[] chars = hexaValue.ToCharArray();
-                string totalPacket = "";
-                for (int j = 6; j < chars.Length; j += 5) // characters
-                {
-                    string packetGroup = hexaValue.Substring(j + 1, 4);
-                    totalPacket += packetGroup;
-                    if (chars[j].ToString() == "0")
-                    {
-                        UnityEngine.Debug.Log(totalPacket + " translates to " + Convert.ToInt32(totalPacket, 2));
-                        break;
-                    }
-                }
+                SimpleLiteral(hexaValue);
             }
             else // operator
             {
-                int pathPos = 7;
-                int iteration = 0;
-
-                int subPacketsLength = 0;
-                int curLength = 0; // can not exceed subpacketslength
-
-                int typeBitCounter = 0;
-                char[] chars = hexaValue.ToCharArray();
-                while (pathPos < chars.Length)
-                {
-                    if (iteration == 0)
-                    {
-                        int count = (chars[6].ToString() == "0") ? 15 : 11;
-                        typeBitCounter = (chars[6].ToString() == "0") ? 0 : 1;
-                        string val = hexaValue.Substring(pathPos, count);
-                        subPacketsLength = Convert.ToInt32(val, 2);
-                        UnityEngine.Debug.Log("packet length " + subPacketsLength);
-                        pathPos += count;
-                    }
-                    else
-                    {
-                        if (typeBitCounter == 0)
-                        {
-                            // subPacketsLength defines length in bits -- WORKS CORRECT
-
-                            // SAMPLE: 11010001010
-                            // if its 4 (binary) its a literal value
-                            string checkLit = hexaValue.Substring(pathPos + 3, 3);
-                            string version = hexaValue.Substring(pathPos, 3);
-                            versionSum += Convert.ToInt32(version, 2);
-                            if (checkLit == "100")
-                            {
-                                char[] packetBits = hexaValue.Substring(pathPos + 6).ToCharArray(); // the packets -> 01010
-                                int pBitsCount = 6;
-                                int totalLit = 0;
-                                for (int j = pathPos + 6; j < pathPos + 6 + packetBits.Length; j += 5) // characters
-                                {
-                                    string packetGroup = hexaValue.Substring(j + 1, 4);
-                                    totalLit += Convert.ToInt32(packetGroup, 2);
-                                    if (hexaValue.ToCharArray()[j].ToString() == "0")
-                                    {
-                                        UnityEngine.Debug.Log("Literal value A " + totalLit);
-                                        pBitsCount += 5;
-                                        break;
-                                    }
-                                    pBitsCount += 5;
-                                }
-                                pathPos += pBitsCount;
-                                curLength += pBitsCount;
-
-                                if (curLength == subPacketsLength)
-                                {
-                                    UnityEngine.Debug.Log("Length reached, parsing stopped!");
-                                    break;
-                                }
-                                if (curLength > subPacketsLength)
-                                {
-                                    UnityEngine.Debug.Log("Length exceeded sub!");
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                UnityEngine.Debug.Log(":(");
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            // subPacketsLength defines count of amount of packets -- WORKS CORRECT
-
-                            // if its 4 (binary) its a literal value
-                            string checkLit = hexaValue.Substring(pathPos + 3, 3);
-                            string version = hexaValue.Substring(pathPos, 3);
-                            versionSum += Convert.ToInt32(version, 2);
-                            if (checkLit == "100")
-                            {
-                                char[] packetBits = hexaValue.Substring(pathPos + 6).ToCharArray(); // the packets -> 01010
-                                int pBitsCount = 6;
-                                int totalLit = 0;
-                                for (int j = pathPos + 6; j < pathPos + 6 + packetBits.Length; j += 5) // characters
-                                {
-                                    string packetGroup = hexaValue.Substring(j + 1, 4);
-                                    totalLit += Convert.ToInt32(packetGroup, 2);
-                                    if (hexaValue.ToCharArray()[j].ToString() == "0")
-                                    {
-                                        UnityEngine.Debug.Log("Literal value B " + totalLit);
-                                        pBitsCount += 5;
-                                        break;
-                                    }
-                                    pBitsCount += 5;
-                                }
-                                pathPos += pBitsCount;
-                                curLength++;
-
-                                if (curLength == subPacketsLength)
-                                {
-                                    UnityEngine.Debug.Log("Count reached, parsing stopped!");
-                                    break;
-                                }
-                                if (curLength > subPacketsLength)
-                                {
-                                    UnityEngine.Debug.Log("Count exceeded sub!");
-                                    break;
-                                }
-                            }
-                            else // operator
-                            {
-                                // TODO MAKE RECURSIVE OPERATOR
-                                UnityEngine.Debug.Log(":(((");
-                                break;
-                            }
-                        }
-                    }
-                    iteration++;
-
-                    if (iteration > 500)
-                    {
-                        UnityEngine.Debug.Log("Hard quit");
-                        break;
-                    }
-                }
+                versionSum = CalculateOperator(hexaValue, versionSum);
             }
 
             UnityEngine.Debug.Log("Version sum " + versionSum);
@@ -203,5 +71,149 @@ public class day16 : MonoBehaviour
 
         st.Stop();
         UnityEngine.Debug.Log(string.Format("took {0} ms to complete", st.ElapsedMilliseconds));
+    }
+
+    void SimpleLiteral(string hexaValue)
+    {
+        char[] chars = hexaValue.ToCharArray();
+        string totalPacket = "";
+        for (int j = 6; j < chars.Length; j += 5) // characters
+        {
+            string packetGroup = hexaValue.Substring(j + 1, 4);
+            totalPacket += packetGroup;
+            if (chars[j].ToString() == "0")
+            {
+                UnityEngine.Debug.Log(totalPacket + " translates to " + Convert.ToInt32(totalPacket, 2));
+                break;
+            }
+        }
+    }
+    
+    int[] CalculateLiteralValue(string hexaValue, int pathPos)
+    {
+        char[] packetBits = hexaValue.ToCharArray();
+        int iterations = 6;
+        int totalLit = 0;
+        for (int j = pathPos + 6; j < pathPos + 6 + packetBits.Length; j += 5)
+        {
+            string packetGroup = hexaValue.Substring(j + 1, 4);
+            totalLit += Convert.ToInt32(packetGroup, 2);
+            if (packetBits[j].ToString() == "0")
+            {
+                UnityEngine.Debug.Log("Total literal " + totalLit);
+                iterations += 5;
+                break;
+            }
+            iterations += 5;
+        }
+
+        return new int[] { iterations, totalLit };
+    }
+
+    int recur = 0;
+    int CalculateOperator(string hexaValue, int versionSum)
+    {
+        int pathPos = 7;
+        int iteration = 0;
+
+        int subPacketsLength = 0;
+        int curLength = 0; // can not exceed subpacketslength
+
+        int typeBitCounter = 0;
+        char[] chars = hexaValue.ToCharArray();
+        while (pathPos < chars.Length)
+        {
+            if (iteration == 0)
+            {
+                int count = (chars[6].ToString() == "0") ? 15 : 11;
+                typeBitCounter = (chars[6].ToString() == "0") ? 0 : 1;
+                string val = hexaValue.Substring(pathPos, count);
+                subPacketsLength = Convert.ToInt32(val, 2);
+                UnityEngine.Debug.Log("packet length " + subPacketsLength);
+                pathPos += count;
+            }
+            else
+            {
+                if (typeBitCounter == 0)
+                {
+                    // subPacketsLength defines length in bits -- WORKS CORRECT
+
+                    // SAMPLE: 11010001010
+                    // if its 4 (binary) its a literal value
+                    string checkLit = hexaValue.Substring(pathPos + 3, 3);
+                    string version = hexaValue.Substring(pathPos, 3);
+                    versionSum += Convert.ToInt32(version, 2);
+                    if (checkLit == "100") // issa literal~!
+                    {
+                        char[] packetBits = hexaValue.Substring(pathPos + 6).ToCharArray(); // the packets
+                        int[] answers = CalculateLiteralValue(hexaValue, pathPos);
+                        int pBitsCount = answers[0];
+                        int totalLit = answers[1];
+                        pathPos += pBitsCount;
+                        curLength += pBitsCount;
+
+                        if (curLength == subPacketsLength)
+                        {
+                            UnityEngine.Debug.Log("Length reached, parsing stopped!");
+                            break;
+                        }
+                        if (curLength > subPacketsLength)
+                        {
+                            UnityEngine.Debug.Log("Length exceeded sub!");
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log(":(");
+                        break;
+                    }
+                }
+                else
+                {
+                    // subPacketsLength defines count of amount of packets -- WORKS CORRECT
+
+                    // if its 4 (binary) its a literal value
+                    string checkLit = hexaValue.Substring(pathPos + 3, 3);
+                    string version = hexaValue.Substring(pathPos, 3);
+                    versionSum += Convert.ToInt32(version, 2);
+                    if (checkLit == "100")
+                    {
+                        char[] packetBits = hexaValue.Substring(pathPos + 6).ToCharArray(); // the packets -> 01010
+                        int[] answers = CalculateLiteralValue(hexaValue, pathPos);
+                        int pBitsCount = answers[0];
+                        int totalLit = answers[1];
+                        pathPos += pBitsCount;
+                        curLength++;
+
+                        if (curLength == subPacketsLength)
+                        {
+                            UnityEngine.Debug.Log("Count reached, parsing stopped!");
+                            break;
+                        }
+                        if (curLength > subPacketsLength)
+                        {
+                            UnityEngine.Debug.Log("Count exceeded sub!");
+                            break;
+                        }
+                    }
+                    else // operator
+                    {
+                        recur++;
+                        if (recur >= 10) return 0;
+                        versionSum = CalculateOperator(hexaValue.Substring(pathPos), versionSum);
+                    }
+                }
+            }
+            iteration++;
+
+            if (iteration > 500)
+            {
+                UnityEngine.Debug.Log("Hard quit");
+                break;
+            }
+        }
+
+        return versionSum;
     }
 }
