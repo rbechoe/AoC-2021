@@ -10,7 +10,6 @@ using UnityEngine;
 public class day16 : MonoBehaviour
 {
     public string[] entries;
-    bool iterationDone = false;
     int recur = 0;
     int actualPosition = 0;
 
@@ -137,7 +136,7 @@ public class day16 : MonoBehaviour
 
         int typeBitCounter = 0;
         char[] chars = hexaValue.ToCharArray();
-        while (actualPosition < chars.Length && !iterationDone)
+        while (actualPosition < chars.Length)
         {
             if (iteration == 0)
             {
@@ -147,7 +146,6 @@ public class day16 : MonoBehaviour
                 if (actualPosition + count >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
-                    iterationDone = true;
                     return new int[] { count, versionSum };
                 }
 
@@ -165,7 +163,6 @@ public class day16 : MonoBehaviour
                 if (actualPosition + 6 >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
-                    iterationDone = true;
                     return new int[] { 18, versionSum };
                 }
 
