@@ -69,6 +69,8 @@ public class day16b : MonoBehaviour
 
             UnityEngine.Debug.Log("Version sum: " + versionSum);
             UnityEngine.Debug.Log("Final answer: " + finalAnswer[2]);
+            // correct answer: 911945136934
+            // my calculated answer: -946527008
         }
 
         st.Stop();
