@@ -65,9 +65,8 @@ public class day16 : MonoBehaviour
             else // operator
             {
                 versionSum = CalculateOperator(hexaValue, versionSum)[1];
+                UnityEngine.Debug.Log("Version sum: " + versionSum);
             }
-
-            UnityEngine.Debug.Log("Version sum " + versionSum);
         }
 
         st.Stop();
@@ -100,18 +99,14 @@ public class day16 : MonoBehaviour
         {
             return new int[] { iterations, totalLit };
         }
-
+        
         for (int j = pathPos + 6; j < pathPos + 6 + packetBits.Length; j += 5)
         {
             string packetGroup = "";
             packetGroup = hexaValue.Substring(j + 1, 4);
             totalLit += Convert.ToInt32(packetGroup, 2);
-            if (packetBits[j].ToString() == "0")
-            {
-                iterations += 5;
-                break;
-            }
             iterations += 5;
+            if (packetBits[j].ToString() == "0") break;
         }
         
         return new int[] { iterations, totalLit };
@@ -122,7 +117,7 @@ public class day16 : MonoBehaviour
     {
         //UnityEngine.Debug.Log("hex: " + hexaValue);
         int pathPos = 7 + offset;
-        UnityEngine.Debug.Log("path start: " + pathPos + " version " + versionSum);
+        //UnityEngine.Debug.Log("path start: " + pathPos + " version " + versionSum);
 
         if (pathPos > hexaValue.Length)
         {
@@ -145,9 +140,14 @@ public class day16 : MonoBehaviour
             {
                 int count = (chars[6 + offset].ToString() == "0") ? 15 : 11;
                 typeBitCounter = (chars[6 + offset].ToString() == "0") ? 0 : 1;
+                if (pathPos + count >= hexaValue.Length)
+                {
+                    UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
+                    iterationDone = true;
+                    return new int[] { count, versionSum };
+                }
                 string val = hexaValue.Substring(pathPos, count);
                 subPacketsLength = Convert.ToInt32(val, 2);
-                //UnityEngine.Debug.Log("packet length " + subPacketsLength + " binary " + val);
                 pathPos += count;
             }
             else
@@ -157,7 +157,7 @@ public class day16 : MonoBehaviour
                 bool incrementSingle = (typeBitCounter == 0) ? false : true;
 
                 // if its 4 (binary) its a literal value
-                UnityEngine.Debug.Log(pathPos + "/" + hexaValue.Length);
+                //UnityEngine.Debug.Log(pathPos + "/" + hexaValue.Length);
                 if (pathPos + 6 >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
@@ -167,6 +167,7 @@ public class day16 : MonoBehaviour
 
                 string checkLit = hexaValue.Substring(pathPos + 3, 3);
                 string version = hexaValue.Substring(pathPos, 3);
+                UnityEngine.Debug.Log("add version " + Convert.ToInt32(version, 2));
                 versionSum += Convert.ToInt32(version, 2);
                 if (checkLit == "100") // issa literal~!
                 {
