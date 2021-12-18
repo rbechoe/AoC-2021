@@ -13,6 +13,15 @@ public class day16 : MonoBehaviour
     int recur = 0;
     int actualPosition = 0;
 
+    int litVal = 0;
+    int sumVal = 0;
+    int prodVal = 0;
+    int minVal = 0;
+    int maxVal = 0;
+    int greatVal = 0;
+    int lessVal = 0;
+    int eqVal = 0;
+
     void Start()
     {
         Stopwatch st = new Stopwatch();
@@ -56,7 +65,7 @@ public class day16 : MonoBehaviour
                 hexaValue += hexaCoding[entries[i][j].ToString()];
             }
 
-            //UnityEngine.Debug.Log(hexaValue);
+            UnityEngine.Debug.Log(hexaValue);
             string packetVersion = hexaValue.Substring(0, 3);
             //UnityEngine.Debug.Log("Found version " + Convert.ToInt32(packetVersion, 2));
             versionSum += Convert.ToInt32(packetVersion, 2);
@@ -69,8 +78,16 @@ public class day16 : MonoBehaviour
             else // operator
             {
                 versionSum = CalculateOperator(hexaValue, versionSum)[1];
-                UnityEngine.Debug.Log("Version sum: " + versionSum);
             }
+            UnityEngine.Debug.Log("litVal " + litVal);
+            UnityEngine.Debug.Log("sumVal " + sumVal);
+            UnityEngine.Debug.Log("prodVal " + prodVal);
+            UnityEngine.Debug.Log("minVal " + minVal);
+            UnityEngine.Debug.Log("maxVal " + maxVal);
+            UnityEngine.Debug.Log("great " + greatVal);
+            UnityEngine.Debug.Log("less " + lessVal);
+            UnityEngine.Debug.Log("eqVal " + eqVal);
+            UnityEngine.Debug.Log("Version sum: " + versionSum);
         }
 
         st.Stop();
@@ -115,8 +132,9 @@ public class day16 : MonoBehaviour
         
         return new int[] { iterations, totalLit };
     }
-    
-    int[] CalculateOperator(string hexaValue, int versionSum)
+
+    // part A solution
+    /*int[] CalculateOperator(string hexaValue, int versionSum)
     {
         //UnityEngine.Debug.Log("hex: " + hexaValue);
         actualPosition += 7;
@@ -202,6 +220,154 @@ public class day16 : MonoBehaviour
                     int[] answer = CalculateOperator(hexaValue, versionSum);
                     actualPosition += answer[0];
                     versionSum = answer[1];
+                }
+            }
+            iteration++;
+
+            if (iteration > 500)
+            {
+                UnityEngine.Debug.Log("Hard quit");
+                break;
+            }
+        }
+
+        return new int[] { pathUpdate, versionSum };
+    }*/
+
+    // Part B solution
+    int[] CalculateOperator(string hexaValue, int versionSum)
+    {
+        //UnityEngine.Debug.Log("hex: " + hexaValue);
+        actualPosition += 7;
+        //UnityEngine.Debug.Log("path start: " + actualPosition + " version " + versionSum);
+
+        if (actualPosition > hexaValue.Length)
+        {
+            UnityEngine.Debug.LogError("Start is bigger than hexa length, version " + versionSum);
+            return new int[] { 18, versionSum };
+        }
+
+        //UnityEngine.Debug.Log("recursion: " + recur);
+        int iteration = 0;
+        int pathUpdate = 0;
+
+        int subPacketsLength = 0;
+        int curLength = 0; // can not exceed subpacketslength
+
+        int typeBitCounter = 0;
+        char[] chars = hexaValue.ToCharArray();
+        while (actualPosition < chars.Length)
+        {
+            if (iteration == 0)
+            {
+                int count = (chars[actualPosition - 1].ToString() == "0") ? 15 : 11;
+                typeBitCounter = (chars[actualPosition - 1].ToString() == "0") ? 0 : 1;
+
+                if (actualPosition + count >= hexaValue.Length)
+                {
+                    //UnityEngine.Debug.LogError("Start is bigger or equal to hexa length, version " + versionSum);
+                    //UnityEngine.Debug.Log(actualPosition + "/" + hexaValue.Length);
+                    return new int[] { count, versionSum };
+                }
+
+                string val = hexaValue.Substring(actualPosition, count);
+                subPacketsLength = Convert.ToInt32(val, 2);
+                actualPosition += count;
+            }
+            else
+            {
+                // typebit 0 = subPacketsLength defines length in bits
+                // typebit 1 = subPacketsLength defines count of amount of packets
+                bool incrementSingle = (typeBitCounter == 0) ? false : true;
+
+                if (actualPosition + 6 >= hexaValue.Length)
+                {
+                    UnityEngine.Debug.LogError("Start is bigger or equal to hexa length, version " + versionSum);
+                    UnityEngine.Debug.Log(actualPosition + "/" + hexaValue.Length);
+                    return new int[] { 18, versionSum };
+                }
+
+                string checkLit = hexaValue.Substring(actualPosition + 3, 3);
+                string version = hexaValue.Substring(actualPosition, 3);
+                //UnityEngine.Debug.Log("Found version " + Convert.ToInt32(version, 2));
+                versionSum += Convert.ToInt32(version, 2);
+
+
+
+                char[] packetBits = hexaValue.ToCharArray();
+                int iterations = 6;
+                if (actualPosition + 11 > hexaValue.Length)
+                {
+                    UnityEngine.Debug.LogError("Forced to return");
+                    return new int[] { pathUpdate, versionSum };
+                }
+
+                UnityEngine.Debug.Log("Code: " + checkLit);
+                //UnityEngine.Debug.Log(actualPosition);
+                switch (checkLit)
+                {
+                    case "000": // sum
+                        for (int j = actualPosition + 6; j < actualPosition + 6 + packetBits.Length; j += 5)
+                        {
+                            string packetGroup = "";
+                            packetGroup = hexaValue.Substring(j + 1, 4);
+                            sumVal += Convert.ToInt32(packetGroup, 2);
+                            iterations += 5;
+                            if (packetBits[j].ToString() == "0") break;
+                        }
+                        break;
+
+                    case "001": // product
+                        for (int j = actualPosition + 6; j < actualPosition + 6 + packetBits.Length; j += 5)
+                        {
+                            string packetGroup = "";
+                            packetGroup = hexaValue.Substring(j + 1, 4);
+                            if (prodVal == 0)
+                                prodVal = Convert.ToInt32(packetGroup, 2);
+                            else
+                                prodVal *= Convert.ToInt32(packetGroup, 2);
+                            iterations += 5;
+                            if (packetBits[j].ToString() == "0") break;
+                        }
+                        break;
+
+                    case "010": // minimum
+
+                        break;
+
+                    case "100": // literal
+                        for (int j = 6; j < chars.Length; j += 5) // characters
+                        {
+                            litVal += Convert.ToInt32(hexaValue.Substring(j + 1, 4), 2);
+                            iterations += 5;
+                            if (chars[j].ToString() == "0") break;
+                        }
+                        break; 
+
+                    case "101": // maximum
+
+                        break;
+
+                    case "110": // less than
+
+                        break;
+
+                    case "111": // equal to
+
+                        break;
+                }
+
+                actualPosition += iterations;
+
+                if (incrementSingle)
+                    curLength++;
+                else
+                    curLength += iterations;
+                
+                if (curLength >= subPacketsLength)
+                {
+                    //UnityEngine.Debug.Log("Length reached or exceeded, parsing stopped!");
+                    return new int[] { pathUpdate, versionSum };
                 }
             }
             iteration++;
