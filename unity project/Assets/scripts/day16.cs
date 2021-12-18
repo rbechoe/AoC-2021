@@ -11,6 +11,8 @@ public class day16 : MonoBehaviour
 {
     public string[] entries;
     bool iterationDone = false;
+    int recur = 0;
+    int actualPosition = 0;
 
     void Start()
     {
@@ -47,6 +49,8 @@ public class day16 : MonoBehaviour
         {
             string hexaValue = "";
             int versionSum = 0;
+            recur = 0;
+            actualPosition = 0;
 
             for (int j = 0; j < entries[i].Length; j++) // characters
             {
@@ -112,11 +116,12 @@ public class day16 : MonoBehaviour
         return new int[] { iterations, totalLit };
     }
 
-    int recur = 0;
+    // TODO replace pathpos and offset with "actual position"
     int[] CalculateOperator(string hexaValue, int versionSum, int offset = 0)
     {
         //UnityEngine.Debug.Log("hex: " + hexaValue);
         int pathPos = 7 + offset;
+        //actualPosition += 7;
         //UnityEngine.Debug.Log("path start: " + pathPos + " version " + versionSum);
 
         if (pathPos > hexaValue.Length)
@@ -140,12 +145,14 @@ public class day16 : MonoBehaviour
             {
                 int count = (chars[6 + offset].ToString() == "0") ? 15 : 11;
                 typeBitCounter = (chars[6 + offset].ToString() == "0") ? 0 : 1;
+
                 if (pathPos + count >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
                     iterationDone = true;
                     return new int[] { count, versionSum };
                 }
+
                 string val = hexaValue.Substring(pathPos, count);
                 subPacketsLength = Convert.ToInt32(val, 2);
                 pathPos += count;
@@ -155,8 +162,7 @@ public class day16 : MonoBehaviour
                 // typebit 0 = subPacketsLength defines length in bits
                 // typebit 1 = subPacketsLength defines count of amount of packets
                 bool incrementSingle = (typeBitCounter == 0) ? false : true;
-
-                // if its 4 (binary) its a literal value
+                
                 //UnityEngine.Debug.Log(pathPos + "/" + hexaValue.Length);
                 if (pathPos + 6 >= hexaValue.Length)
                 {
@@ -192,24 +198,16 @@ public class day16 : MonoBehaviour
                 else // issa operator
                 {
                     recur++;
-                    if (recur >= 10)
+                    if (recur >= 50)
                     {
-                        UnityEngine.Debug.Log("Recursion loop version " + versionSum);
+                        UnityEngine.Debug.LogError("Recursion loop version " + versionSum);
                         return new int[] { pathUpdate, versionSum };
                     }
 
-                    if (pathPos < hexaValue.Length)
-                    {
-                        UnityEngine.Debug.Log("Summoning recursion, current version " + versionSum);
-                        int[] answer = CalculateOperator(hexaValue, versionSum, pathPos);
-                        pathPos += answer[0];
-                        versionSum = answer[1];
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.Log("Remaining hexavalue is " + (hexaValue.Length - pathPos) + " version " + versionSum);
-                        return new int[] { pathUpdate, versionSum };
-                    }
+                    UnityEngine.Debug.Log("Summoning recursion, current version " + versionSum);
+                    int[] answer = CalculateOperator(hexaValue, versionSum, pathPos);
+                    pathPos += answer[0];
+                    versionSum = answer[1];
                 }
             }
             iteration++;
