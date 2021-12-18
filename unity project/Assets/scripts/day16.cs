@@ -115,16 +115,14 @@ public class day16 : MonoBehaviour
         
         return new int[] { iterations, totalLit };
     }
-
-    // TODO replace pathpos and offset with "actual position"
-    int[] CalculateOperator(string hexaValue, int versionSum, int offset = 0)
+    
+    int[] CalculateOperator(string hexaValue, int versionSum)
     {
         //UnityEngine.Debug.Log("hex: " + hexaValue);
-        int pathPos = 7 + offset;
-        //actualPosition += 7;
-        //UnityEngine.Debug.Log("path start: " + pathPos + " version " + versionSum);
+        actualPosition += 7;
+        //UnityEngine.Debug.Log("path start: " + actualPosition + " version " + versionSum);
 
-        if (pathPos > hexaValue.Length)
+        if (actualPosition > hexaValue.Length)
         {
             UnityEngine.Debug.Log("Start is bigger than hexa length, version " + versionSum);
             return new int[] { 18, versionSum };
@@ -139,49 +137,49 @@ public class day16 : MonoBehaviour
 
         int typeBitCounter = 0;
         char[] chars = hexaValue.ToCharArray();
-        while (pathPos < chars.Length && !iterationDone)
+        while (actualPosition < chars.Length && !iterationDone)
         {
             if (iteration == 0)
             {
-                int count = (chars[6 + offset].ToString() == "0") ? 15 : 11;
-                typeBitCounter = (chars[6 + offset].ToString() == "0") ? 0 : 1;
+                int count = (chars[actualPosition - 1].ToString() == "0") ? 15 : 11;
+                typeBitCounter = (chars[actualPosition - 1].ToString() == "0") ? 0 : 1;
 
-                if (pathPos + count >= hexaValue.Length)
+                if (actualPosition + count >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
                     iterationDone = true;
                     return new int[] { count, versionSum };
                 }
 
-                string val = hexaValue.Substring(pathPos, count);
+                string val = hexaValue.Substring(actualPosition, count);
                 subPacketsLength = Convert.ToInt32(val, 2);
-                pathPos += count;
+                actualPosition += count;
             }
             else
             {
                 // typebit 0 = subPacketsLength defines length in bits
                 // typebit 1 = subPacketsLength defines count of amount of packets
                 bool incrementSingle = (typeBitCounter == 0) ? false : true;
-                
-                //UnityEngine.Debug.Log(pathPos + "/" + hexaValue.Length);
-                if (pathPos + 6 >= hexaValue.Length)
+
+                //UnityEngine.Debug.Log(actualPosition + "/" + hexaValue.Length);
+                if (actualPosition + 6 >= hexaValue.Length)
                 {
                     UnityEngine.Debug.Log("Start is bigger or equal to hexa length, version " + versionSum);
                     iterationDone = true;
                     return new int[] { 18, versionSum };
                 }
 
-                string checkLit = hexaValue.Substring(pathPos + 3, 3);
-                string version = hexaValue.Substring(pathPos, 3);
+                string checkLit = hexaValue.Substring(actualPosition + 3, 3);
+                string version = hexaValue.Substring(actualPosition, 3);
                 UnityEngine.Debug.Log("add version " + Convert.ToInt32(version, 2));
                 versionSum += Convert.ToInt32(version, 2);
                 if (checkLit == "100") // issa literal~!
                 {
-                    char[] packetBits = hexaValue.Substring(pathPos + 6).ToCharArray(); // the packets
-                    int[] answers = CalculateLiteralValue(hexaValue, pathPos);
+                    char[] packetBits = hexaValue.Substring(actualPosition + 6).ToCharArray(); // the packets
+                    int[] answers = CalculateLiteralValue(hexaValue, actualPosition);
                     int pBitsCount = answers[0];
                     int totalLit = answers[1];
-                    pathPos += pBitsCount;
+                    actualPosition += pBitsCount;
 
                     if (incrementSingle)
                         curLength++;
@@ -205,8 +203,8 @@ public class day16 : MonoBehaviour
                     }
 
                     UnityEngine.Debug.Log("Summoning recursion, current version " + versionSum);
-                    int[] answer = CalculateOperator(hexaValue, versionSum, pathPos);
-                    pathPos += answer[0];
+                    int[] answer = CalculateOperator(hexaValue, versionSum);
+                    actualPosition += answer[0];
                     versionSum = answer[1];
                 }
             }
