@@ -6,16 +6,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-public class day21b : MonoBehaviour
+public class day21 : MonoBehaviour
 {
-    public List<int> positions;
-    public List<int> scores;
-    public List<int> players;
-    public int player1wins;
-    public int player2wins;
+    public int[] positions;
+    public int[] scores;
+    public int players = 2;
     public int winCondition = 21;
     public int dieVal = 1;
     public int totalRolls = 0;
+    int losingPlayer = 0;
 
     bool gameDone = false;
 
@@ -25,8 +24,8 @@ public class day21b : MonoBehaviour
         st.Start();
 
         // logic here
-        positions = new List<int>();
-        scores = new List<int>();
+        positions = new int[players];
+        scores = new int[players];
 
         // assign starting positions
         positions[0] = 4;
@@ -39,13 +38,12 @@ public class day21b : MonoBehaviour
 
         st.Stop();
         UnityEngine.Debug.Log(string.Format("took {0} ms to complete", st.ElapsedMilliseconds));
-        //UnityEngine.Debug.Log("Answer: " + (totalRolls * scores[losingPlayer]));
+        UnityEngine.Debug.Log("Answer: " + (totalRolls * scores[losingPlayer]));
     }
 
     void RollDie()
     {
-        // copy current lists before making new lists for the dies, once done apply the new lists to the existing ones
-        for (int i = 0; i < scores.Count; i++)
+        for (int i = 0; i < players; i++)
         {
             int val = 0;
             for (int j = 0; j < 3; j++)
@@ -56,8 +54,6 @@ public class day21b : MonoBehaviour
                 dieVal++;
                 dieVal = newVal(dieVal, 100);
                 if (dieVal == 0) dieVal = 1;
-
-                // TODO add new item to list and update the score of each item, including position, player etc etc
             }
 
             positions[i] += val;
@@ -84,8 +80,7 @@ public class day21b : MonoBehaviour
         if (scores[player] >= winCondition)
         {
             UnityEngine.Debug.Log("Player " + (player + 1) + " won!");
-            if (player == 0) player1wins++;
-            if (player == 1) player2wins++;
+            if (player == 0) losingPlayer = 1;
             gameDone = true;
             return true;
         }
