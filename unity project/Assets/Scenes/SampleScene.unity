@@ -404,12 +404,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec431ad55ad12494ab635c8645a40fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  positions: 
-  scores: 
-  players: 2
+  player1wins: 0
+  player2wins: 0
   winCondition: 21
-  dieVal: 1
   totalRolls: 0
+  unFinishedGames: 0
 --- !u!1 &1670012819
 GameObject:
   m_ObjectHideFlags: 0
