@@ -351,8 +351,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1461637405}
-  - component: {fileID: 1461637404}
   - component: {fileID: 1461637406}
+  - component: {fileID: 1461637404}
   m_Layer: 0
   m_Name: day 21
   m_TagString: Untagged
@@ -375,7 +375,7 @@ MonoBehaviour:
   positions: 
   scores: 
   players: 2
-  winCondition: 1000
+  winCondition: 21
   dieVal: 1
   totalRolls: 0
 --- !u!4 &1461637405
@@ -407,8 +407,8 @@ MonoBehaviour:
   player1wins: 0
   player2wins: 0
   winCondition: 21
-  totalRolls: 0
-  unFinishedGames: 0
+  startP1: 4
+  startP2: 6
 --- !u!1 &1670012819
 GameObject:
   m_ObjectHideFlags: 0
